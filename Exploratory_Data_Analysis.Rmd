@@ -1,0 +1,142 @@
+---
+title: "Exploratory Date Analysis"
+author: "Sarah Driver"
+date: "7/31/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##RILUZOLE DATA 
+I set my working directory at the start of this. 
+```{r}
+Riluzole_data <- read.csv(file = "./data/Riluzole.csv") #loads data. If issues with loading, copy and paste into the console. 
+View(Riluzole_data) #Taking a look 
+class(Riluzole_data) #Is a data frame 
+```
+Initial analysis: There are a lot of times in this dataset, and definitely multiples of the patients IDs. I will also need to rename a number of things For example, I will re-name subject_id as patientID. 
+
+##TREATMENT DATA
+```{r}
+Treatment_data <- read.csv(file = "./data/Treatment.csv") #loads data. If issues with loading, copy and paste into the console.
+view(Treatment_data) #Taking a look
+
+#Checking unique data in column:
+unique(Treatment_data$Study_Arm) #says: active and placebo 
+```
+Will need to convert delta category to time, but can ignore. Will set active and placebo equal to 1 and 0. 
+
+##ALSFRS DATA
+```{r}
+ALSFRS_data <- read.csv(file = "./data/alsfrs.csv") #loads data. If issues with loading, copy and paste into the console.
+view(ALSFRS_data) #Taking a look
+class(ALSFRS_data) #Is a data frame 
+
+#Checking unique data in column:
+unique(ALSFRS_data$Q5a_Cutting_without_Gastrostomy) #says: 2.0 1.5 1.0 3.0 4.0 NA 3.5 0.0 2.5 0.5
+unique(ALSFRS_data$Q5b_Cutting_with_Gastrostomy) #says: NA 4.0 3.0 2.0 0.0 1.0 3.5 0.5 2.5
+```
+In the ALSFRS dataset, I will be re-coding and combining variables. I will re-name subject_id as patientID. There are a large number of questions in this and I will need to re-code them into their proper names, per the project directions. I checked that Delta refers to time. I also have to add up all questions from the old test in order to put them into terms of the new test. Will have to merge the columns with NA correctly, in order to not lose all important information. 
+
+##DEMOGRAPHICS DATA
+```{r}
+Demographics_data <- read.csv(file = "./data/demographics.csv") #loads data. If issues with loading, copy and paste into the console.
+view(Demographics_data) #checking data
+class(Demographics_data$Demographics_Delta) #class is integer 
+
+#Checking for NA
+sum(is.na (Demographics_data$Sex)) #Says there are zero NA
+sum(is.na (Demographics_data$Age)) #3021 NAs
+
+#Checking classes
+class(Demographics_data$Sex) #class is character 
+class(Demographics_data$Age) #class is numeric 
+```
+In the Demographics dataset, I will be filtering for races equal to 1 and putting them into their own columns. I will be dropping NAs at the end. I will re-name subject_id as patientID. Will note to missing NAs and try to either fix or remove. Need to make sure no character columns make it into baseline dataset. 
+
+##LABS DATA
+```{r}
+Labs_data <- read.csv(file = "./data/Labs.csv") #loads data. If issues with loading, copy and paste into the console.
+View(Labs_data) #checking data
+range(Labs_data$Laboratory_Delta) #time range says NA and NA
+
+#Checking a class 
+class(Labs_data$Test_Result) #class: character 
+class(Labs_data$Test_Name) #class: character
+class(Labs_data$Test_Unit) #class: character
+```
+Here I will be re-naming columns and filtering by date. Will drop NAs as needed. The test units are mixed and need to be standardized in order to have one row per patient. Tests will be put into the header so that they appear in the baseline daataset in the proper format. Also need to make sure the columns are not characters when uploading to baseline dataset. 
+
+#FORCED VITAL CAPACITY DATA
+```{r}
+FVC_data <- read.csv(file = "./data/fvc.csv") #loads data. If issues with loading, copy and paste into the console.
+View(FVC_data) #exploring the data
+
+#Checking classes (particularly to see that I can do math with the columns)
+class(FVC_data$Subject_Liters_Trial_1) #class is numeric 
+class(FVC_data$Subject_Liters_Trial_2) #class is numeric 
+class(FVC_data$Subject_Liters_Trial_3) #class is numeric 
+
+#Checking for NA
+sum(is.na (FVC_data$Subject_Liters_Trial_1)) #3284 NA
+sum(is.na (FVC_data$Subject_Liters_Trial_2)) #32304 NA
+sum(is.na (FVC_data$Subject_Liters_Trial_3)) #32431 NA
+```
+I will have to select for a time range. Will find mean across tests, so it's good that the column classes that I looked at here are numeric. Will delete unnecessary columns.
+
+#SLOW VITAL CAPACITY DATA
+```{r}
+SVC_data <- read.csv(file = "./data/svc.csv") #loads data. If issues with loading, copy and paste into the console.
+head(SVC_data, 10) #Looking at everything: the headers are a bit irregular and will need to be fixed
+
+#Checking for NA
+sum(is.na (SVC_data$Subject_Liters_Trial_1)) #7 NA
+sum(is.na (SVC_data$Subject_Liters_Trial_2)) #0 NA
+sum(is.na (SVC_data$Subject_Liters_Trial_3)) #0 NA
+
+#Checking classes
+class(SVC_data$Subject_Liters_Trial_1) #class is numeric 
+class(SVC_data$Subject_Liters_Trial_2) #class is NULL
+class(SVC_data$Subject_Liters_Trial_3) #class is NULL
+```
+Again, I will be re-naming columns and filtering by date. Will drop NAs and NULLs as needed. It does not appear that all of the tests have info in them. Should examine these for more information. 
+
+#VITALS DATA
+```{r}
+VS_data <- read.csv(file = "./data/VitalSigns.csv") #loads data. If issues with loading, copy and paste into the console.
+view(VS_data) #exploring the data
+
+#Checking for NA
+sum(is.na (VS_data$Height)) #62716 NA
+sum(is.na (VS_data$Weight)) #21476 NA
+
+#Checking classes
+class(VS_data$Height) #class is numeric 
+class(VS_data$Weight) #class is numeric 
+
+#Checking for unique units in columns 
+unique(VS_data$Height_Units) #There are blank spaces, centimeters, and inches in Height_Units
+unique(VS_data$Weight_Units) #There are blank spaces, kilograms, and pounds in Weight_Units
+```
+Will sort by times and re-name certain columns. Will need to standardize measurements in order to craft BMI. 
+
+
+# ALS HISTORY DATA
+```{r}
+#Loading data 
+alshistory_data <- read.csv(file = "./data/AlsHistory.csv")
+
+#Examining data
+view(alshistory_data)
+unique(alshistory_data$Onset_Delta) #appears to be largely negative numbers 
+
+#Data class 
+class(alshistory_data$Onset_Delta) #integer class 
+
+#Looking for NAs
+sum(is.na (alshistory_data$Onset_Delta)) #4741 NA
+```
+Will need to get rid of NAs and make sure that the delta is relabeled correctly. There are a few deltas(days) referenced but only one is called the Onset Delta, which is what we are looking for. Other columns can be disreagrded, aside from the subject ID, which we will relabel to standardize. Will slice the data so that only one per patient appears in the baseline dataset. Looks like there aren't issues with the class, either. 
+
